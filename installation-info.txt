@@ -1,0 +1,17 @@
+sudo update-alternatives --config gcc  // switch to another compiler version
+g++ --version  // check C++ compiler version
+gcc --version  // check C compiler version
+
+g++  11.4.0
+gcc  11.4.0
+
+
+Installation
+sudo apt-get install cmake pkg-config
+sudo apt-get install mesa-utils mesa-common-dev libglu1-mesa-dev freeglut3-dev  // core OpenGL utilities (libraries for rendering, handling windowing and output)
+sudo apt-get install libglew-dev libglfw3-dev libglm-dev  // advanced development libraries (GLEW, GLFWm GLM)
+sudo apt-get install libao-dev libmpg123-dev  // libraries related to audio processing (optional)
+
+sudo apt install libassimp-dev  // library for model loading
+sudo apt-get install glslang-tools  // lirary for GLSL linting support
+
