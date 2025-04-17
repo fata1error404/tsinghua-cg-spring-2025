@@ -36,7 +36,7 @@ int main()
     glEnable(GL_BLEND);                // for smooth transparency on the edges
     glBlendFunc(GL_SRC_ALPHA, GL_ONE); // for glowing effect
 
-    ParticleGenerator ourEmitter;
+    ParticleEmitter ourEmitter;
 
     while (!glfwWindowShouldClose(window))
     {
