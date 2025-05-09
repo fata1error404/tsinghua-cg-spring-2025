@@ -17,9 +17,9 @@ homework-6/app
 homework-6/.vscode/
 homework-6/reference/
 
-terrain-project/app
-terrain-project/.vscode/
-terrain-project/reference/
+project/app
+project/.vscode/
+project/reference/
 
 OpenGL/
 Lighting/
