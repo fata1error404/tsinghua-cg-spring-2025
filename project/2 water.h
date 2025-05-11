@@ -22,7 +22,7 @@ public:
     Camera &camera;
     unsigned int VAO, VBO;
     unsigned int texture, skyboxTexture, reflectionTexture, depthMapTexture;
-    std::vector<float> waterVertices;
+    std::vector<float> vertices;
     float waterOffset;
 
     Water(Camera &cam, unsigned int sky, unsigned int reflection, unsigned int shadow)
@@ -33,7 +33,7 @@ public:
           shader("shaders/water.vs", "shaders/water.fs"),
           waterOffset(0.0f)
     {
-        waterVertices.resize(GRID * GRID * 6 * 8);
+        vertices.resize(GRID * GRID * 6 * 8);
 
         shader.use();
         glm::mat4 model = glm::mat4(1.0f);
@@ -63,7 +63,7 @@ public:
         glGenBuffers(1, &VBO);
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, waterVertices.size() * sizeof(float), NULL, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), NULL, GL_DYNAMIC_DRAW);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
         glEnableVertexAttribArray(0);
@@ -115,14 +115,14 @@ public:
         //! Lambda function to pack one vertex.
         auto pack = [&](int idx, float x, float y, float z, glm::vec3 n, float u, float v)
         {
-            waterVertices[idx + 0] = x;
-            waterVertices[idx + 1] = y;
-            waterVertices[idx + 2] = z;
-            waterVertices[idx + 3] = n.x;
-            waterVertices[idx + 4] = n.y;
-            waterVertices[idx + 5] = n.z;
-            waterVertices[idx + 6] = u;
-            waterVertices[idx + 7] = v;
+            vertices[idx + 0] = x;
+            vertices[idx + 1] = y;
+            vertices[idx + 2] = z;
+            vertices[idx + 3] = n.x;
+            vertices[idx + 4] = n.y;
+            vertices[idx + 5] = n.z;
+            vertices[idx + 6] = u;
+            vertices[idx + 7] = v;
         };
 
         // 3D waves mesh generations
@@ -163,7 +163,7 @@ public:
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, waterVertices.size() * sizeof(float), waterVertices.data());
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
 
         shader.use();
         shader.setMat4("view", view);
@@ -186,7 +186,7 @@ public:
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, waterVertices.size() / 8);
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 8);
         glBindVertexArray(0);
     }
 };

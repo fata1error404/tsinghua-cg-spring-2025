@@ -37,7 +37,6 @@ unsigned int currentScreenHeight = DEFAULT_SCR_HEIGHT;
 // shadow map resolution
 const unsigned int SHADOW_WIDTH = 4096;
 const unsigned int SHADOW_HEIGHT = 4096;
-const float borderColor[] = {1.0, 1.0, 1.0, 1.0};
 
 // create a Camera class instance with a specified position and default values for other parameters, to access its functionality
 Camera ourCamera;

@@ -35,7 +35,7 @@ Folders structure:
 Install dependencies  
 `sudo apt-get install mesa-utils mesa-common-dev libglu1-mesa-dev freeglut3-dev`
  –  core OpenGL utilities (libraries for rendering, handling windowing and output)  
-`sudo apt-get install libglew-dev libglfw3-dev libglm-dev` – advanced development libraries (GLEW, GLFW GLM)
+`sudo apt-get install libglew-dev libglfw3-dev libglm-dev` – advanced development libraries (GLEW, GLFW, GLM)
 
 Compile and launch  
 `g++ main.cpp -o app -lglfw -lglad`  
