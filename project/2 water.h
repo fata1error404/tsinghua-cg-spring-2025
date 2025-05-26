@@ -9,7 +9,7 @@ const float worldStep = 2.0f / GRID; // distance between neighboring grid points
 const float waterSpeed = 0.1f;       // water texture movement speed
 
 float waveAmp = 0.0f;
-const float waveFreq = 100.0f;
+const float waveFreq = 2.0f * glm::pi<float>() / 20.0f;
 const float waveSpeed = 1.0f;
 
 const float terrainReflectionStrength = 0.9f;
@@ -89,35 +89,47 @@ public:
 
     void draw(glm::mat4 view, glm::mat4 projection, float time, float dt, glm::mat4 reflected_view, bool weather, bool lighting)
     {
-        //! Lambda function to compute the wave height.
-        auto computeHeight = [&](float x, float z)
+        //! Lambda function to compute vertex position in a 2-directional Gerstner wave.
+        auto computePosition = [&](float x, float z)
         {
-            // Gerstner wave formula: simulate wave motion in 2 directions
-            return waveAmp * (sin(waveFreq * x + waveSpeed * time) + cos(waveFreq * z + waveSpeed * time));
+            // start from original static position
+            glm::vec3 pos{x, 0.0f, z};
+
+            // x-direction wave (Gerstner wave formula)
+            float xPhase = waveFreq * (x * waterHorizontalScale) - waveSpeed * time;
+            pos.x += (waveAmp / waterHorizontalScale) * cos(xPhase); // horizontal displacement
+            pos.y += waveAmp * sin(xPhase);                          // vertical displacement
+
+            // z-direction wave
+            float zPhase = waveFreq * (z * waterHorizontalScale) - waveSpeed * time;
+            pos.z += (waveAmp / waterHorizontalScale) * cos(zPhase);
+            pos.y += waveAmp * sin(zPhase);
+
+            return pos;
         };
 
-        //! Lambda function to compute the normal at the grid point (i, j).
-        auto computeNormal = [&](int i, int j)
+        //! Lambda function to compute vertex normal.
+        auto computeNormal = [&](float x, float z)
         {
-            // neighbor heights of a grid point (i, j)
-            float y10 = computeHeight(i, j - 1);
-            float y12 = computeHeight(i, j + 1);
-            float y21 = computeHeight(i - 1, j);
-            float y01 = computeHeight(i + 1, j);
+            // main neighbor vertices
+            glm::vec3 v10 = computePosition(x, z - worldStep);
+            glm::vec3 v12 = computePosition(x, z + worldStep);
+            glm::vec3 v21 = computePosition(x - worldStep, z);
+            glm::vec3 v01 = computePosition(x + worldStep, z);
 
             // central difference derivatives (∂y/∂x, ∂y/∂z: f'(x) ≈ (f(x + h) - f(x - h)) / (2h))
-            float dydx = (y12 - y10) / (2 * worldStep);
-            float dydz = (y01 - y21) * (2 * worldStep);
+            glm::vec3 dvdx = (v01 - v21) / (2.0f * worldStep);
+            glm::vec3 dvdz = (v12 - v10) / (2.0f * worldStep);
 
-            return glm::normalize(glm::vec3(-dydx, 1.0f, -dydz));
+            return glm::normalize(glm::cross(dvdz, dvdx));
         };
 
         //! Lambda function to pack one vertex.
-        auto pack = [&](int idx, float x, float y, float z, glm::vec3 n, float u, float v)
+        auto pack = [&](int idx, glm::vec3 pos, glm::vec3 n, float u, float v)
         {
-            vertices[idx + 0] = x;
-            vertices[idx + 1] = y;
-            vertices[idx + 2] = z;
+            vertices[idx + 0] = pos.x;
+            vertices[idx + 1] = pos.y;
+            vertices[idx + 2] = pos.z;
             vertices[idx + 3] = n.x;
             vertices[idx + 4] = n.y;
             vertices[idx + 5] = n.z;
@@ -137,28 +149,28 @@ public:
                 float x0 = -1.0f + j * worldStep;
                 float x1 = x0 + worldStep;
 
-                float y00 = computeHeight(x0, z0);
-                float y10 = computeHeight(x1, z0);
-                float y11 = computeHeight(x1, z1);
-                float y01 = computeHeight(x0, z1);
+                glm::vec3 v00 = computePosition(x0, z0);
+                glm::vec3 v10 = computePosition(x1, z0);
+                glm::vec3 v11 = computePosition(x1, z1);
+                glm::vec3 v01 = computePosition(x0, z1);
 
-                glm::vec3 n00 = computeNormal(i, j);
-                glm::vec3 n10 = computeNormal(i, j + 1);
-                glm::vec3 n11 = computeNormal(i + 1, j + 1);
-                glm::vec3 n01 = computeNormal(i + 1, j);
+                glm::vec3 n00 = computeNormal(x0, z0);
+                glm::vec3 n10 = computeNormal(x1, z0);
+                glm::vec3 n11 = computeNormal(x1, z1);
+                glm::vec3 n01 = computeNormal(x0, z1);
 
                 // base vertex offset index in the 1D array
                 int base = (i * GRID + j) * 6 * 8;
 
                 // triangle 1: (00, 10, 11)
-                pack(base + 0 * 8, x0, y00, z0, n00, 0.0f, 0.0f);
-                pack(base + 1 * 8, x1, y10, z0, n10, 1.0f, 0.0f);
-                pack(base + 2 * 8, x1, y11, z1, n11, 1.0f, 1.0f);
+                pack(base + 0 * 8, v00, n00, 0.0f, 0.0f);
+                pack(base + 1 * 8, v10, n10, 1.0f, 0.0f);
+                pack(base + 2 * 8, v11, n11, 1.0f, 1.0f);
 
                 // triangle 2: (00, 11, 01)
-                pack(base + 3 * 8, x0, y00, z0, n00, 0.0f, 0.0f);
-                pack(base + 4 * 8, x1, y11, z1, n11, 1.0f, 1.0f);
-                pack(base + 5 * 8, x0, y01, z1, n01, 0.0f, 1.0f);
+                pack(base + 3 * 8, v00, n00, 0.0f, 0.0f);
+                pack(base + 4 * 8, v11, n11, 1.0f, 1.0f);
+                pack(base + 5 * 8, v01, n01, 0.0f, 1.0f);
             }
         }
 

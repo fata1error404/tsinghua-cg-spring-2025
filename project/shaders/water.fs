@@ -73,13 +73,13 @@ void main()
     {
         vec3 L = normalize(lightPos - PosWorldSpace); // light direction vector
         float diff = max(dot(N, L), 0.0);             // measure how aligned the surface is with the light (cos = 1 means the light hits water surface directly)
-        float shadow = checkShadow(PosLightSpace);
+        float isInShadow = checkShadow(PosLightSpace);
 
         vec3 R = reflect(-L, N);
         float spec = pow(max(dot(I, R), 0.0), 64.0); // measure how aligned the view direction is with the reflected light (cos = 1 means the light reflection hits the camera)
 
         vec3 ambient = ambientStrength  * lightColor;
-        vec3 diffuse = diffuseStrength  * lightColor * diff * (1.0 - shadow); // apply diffuse lighting only if the fragment is not in shadow (this allows for rendering shadowed areas)
+        vec3 diffuse = diffuseStrength  * lightColor * diff * (1.0 - isInShadow); // apply diffuse lighting only if the fragment is not in shadow (this allows for rendering shadowed areas)
 
         vec3 specular = specularStrength * lightColor * spec;
 

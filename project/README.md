@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD033 MD001 MD045 -->
+
 # Terrain Engine ⛰️
 
 ### Project overview
@@ -8,7 +10,7 @@ The engine is written in C++ and uses __OpenGL__ 3.3 as its rendering backend (c
 
 ### Result
 
-<img src="result.png" width="80%" height="45%">
+<img src="aux_docs/result.png" width="80%" height="45%">
 
 <br />
 
